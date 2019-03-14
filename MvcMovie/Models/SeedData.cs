@@ -51,7 +51,7 @@ namespace MvcMovie.Models
                     {
                         Title = "Trek: The Movie",
                         ReleaseDate = DateTime.Parse("2008-4-6"),
-                        Genre = " Comedy, Drama, Family",
+                        Genre = "Comedy, Drama, Family",
                         Rating = "PG",
                         Price = 19.99M
                     },
@@ -63,6 +63,15 @@ namespace MvcMovie.Models
                         Genre = "Short, Drama, Family",
                         Rating = "None",
                         Price = 4.99M
+                    },
+
+                    new Movie
+                    {
+                        Title = "17 Miracles",
+                        ReleaseDate = DateTime.Parse("2011-6-3"),
+                        Genre = "Adventure, History",
+                        Rating = "PG",
+                        Price = 14.99M
                     }
                 );
                 context.SaveChanges();

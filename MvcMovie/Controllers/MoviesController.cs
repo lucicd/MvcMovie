@@ -19,8 +19,40 @@ namespace MvcMovie.Controllers
         }
 
         // GET: Movies
-        public async Task<IActionResult> Index(string movieGenre, string searchString)
+        public async Task<IActionResult> Index(string sortOrder, 
+            string currentGenreFilter, string searchGenre, 
+            string currentTitleFilter, string searchTitle, int? page)
         {
+            sortOrder = String.IsNullOrEmpty(sortOrder) ? "id_desc" : sortOrder;
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["IDSortParm"] = sortOrder == "Id" ? "id_desc" : "Id";
+            ViewData["TitleSortParm"] = sortOrder == "Title" ? "title_desc" : "Title";
+            ViewData["ReleaseDateSortParm"] = sortOrder == "ReleaseDate" ? "releasedate_desc" : "ReleaseDate";
+            ViewData["GenreSortParm"] = sortOrder == "Genre" ? "genre_desc" : "Genre";
+            ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
+            ViewData["RatingSortParm"] = sortOrder == "Rating" ? "rating_desc" : "Rating";
+
+            if (searchGenre != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchGenre = currentGenreFilter;
+            }
+
+            if (searchTitle != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchTitle = currentTitleFilter;
+            }
+
+            ViewData["CurrentTitleFilter"] = searchTitle;
+            ViewData["CurrentGenreFilter"] = searchGenre;
+
             // Use LINQ to get list of genres.
             IQueryable<string> genreQuery = from m in _context.Movie
                                             orderby m.Genre
@@ -29,21 +61,61 @@ namespace MvcMovie.Controllers
             var movies = from m in _context.Movie
                          select m;
 
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchTitle))
             {
-                movies = movies.Where(s => s.Title.Contains(searchString));
+                movies = movies.Where(s => s.Title.Contains(searchTitle));
             }
 
-            if (!string.IsNullOrEmpty(movieGenre))
+            if (!string.IsNullOrEmpty(searchGenre))
             {
-                movies = movies.Where(x => x.Genre == movieGenre);
+                movies = movies.Where(x => x.Genre == searchGenre);
             }
 
+            switch (sortOrder)
+            {
+                case "title_desc":
+                    movies = movies.OrderByDescending(s => s.Title);
+                    break;
+                case "Title":
+                    movies = movies.OrderBy(s => s.Title);
+                    break;
+                case "releasedate_desc":
+                    movies = movies.OrderByDescending(s => s.ReleaseDate);
+                    break;
+                case "ReleaseDate":
+                    movies = movies.OrderBy(s => s.ReleaseDate);
+                    break;
+                case "genre_desc":
+                    movies = movies.OrderByDescending(s => s.Genre);
+                    break;
+                case "Genre":
+                    movies = movies.OrderBy(s => s.Genre);
+                    break;
+                case "price_desc":
+                    movies = movies.OrderByDescending(s => s.Price);
+                    break;
+                case "Price":
+                    movies = movies.OrderBy(s => s.Price);
+                    break;
+                case "rating_desc":
+                    movies = movies.OrderByDescending(s => s.Rating);
+                    break;
+                case "Rating":
+                    movies = movies.OrderBy(s => s.Rating);
+                    break;
+                case "id_desc":
+                    movies = movies.OrderByDescending(s => s.Id);
+                    break;
+                default:
+                    movies = movies.OrderBy(s => s.Id);
+                    break;
+            }
+
+            int pageSize = 5;
             var movieGenreVM = new MovieGenreViewModel
             {
                 Genres = new SelectList(await genreQuery.Distinct().ToListAsync()),
-                SearchString = searchString,
-                Movies = await movies.ToListAsync()
+                Movies = await PaginatedList<Movie>.CreateAsync(movies.AsNoTracking(), page ?? 1, pageSize)
             };
 
             return View(movieGenreVM);

@@ -6,6 +6,7 @@ namespace MvcMovie.Models
 {
     public class Movie
     {
+        [Display(Name = "Movie#")]
         public int Id { get; set; }
 
         [StringLength(60, MinimumLength = 3)]
@@ -17,9 +18,8 @@ namespace MvcMovie.Models
         public DateTime ReleaseDate { get; set; }
 
 
-        [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
         [Required]
-        [StringLength(30)]
+        [StringLength(60)]
         public string Genre { get; set; }
 
         [Range(1, 100)]
